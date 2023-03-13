@@ -1,10 +1,10 @@
-Debugger web app for the team at Luminess.
+Stack Overflow clone
 
 Steps to follow for running the project locally
 
 First, clone the repository to your local machine:
 
-    git clone https://github.com/thedanoprean/debugging_cake_portal.git
+    git clone https://github.com/andreivas24/debugging_cake_portal.git
 
 Install the requirements:
 

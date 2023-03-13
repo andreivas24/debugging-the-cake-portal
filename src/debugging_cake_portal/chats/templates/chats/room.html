@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+    <title>Debugging Cake - {{ room.name }}</title>
+{% endblock title %}
+
+{% block content %}
+    {% include 'navbar.html' %}
+    <div class="chat-room">
+        <a href="{% url 'chatrooms' %}"><button class="leave-room-btn"><ion-icon class="leave-icon" size='large' name="play-back-outline">
+        </ion-icon></button></a>
+    </div>
+
+    <div class="room-title">
+            <h1>Chatroom {{ room.name }}</h1>
+    </div>
+
+
+    <div class="chat-container" style="background-image: url({% static 'chat.jpg' %});">
+        <div id="chat-log" class="chat-log">
+            {% for message in messages.all %}
+                {% if message.user.username == request.user.username %}
+                    <div class="message sender">
+                        <div class="sender-username">
+                            <img class="rounded-circle article-img" src="{{ user.profile.image.url }}">
+                            {{message.user.username}}
+                        </div>
+                            {{ message.content }}
+                        </div>
+                        <div class="sender-time">
+                            {{ message.date_added }}
+                        </div>
+                {% else %}
+                    <div class="message receiver">
+                        <div class="receiver-username">
+                            <img class="rounded-circle article-img" src="{{ user.profile.image.url }}">
+                            {{message.user.username}}
+                        </div>
+                        {{ message.content }}
+                    </div>
+                <div class="receiver-time">
+                    {{ message.date_added }}
+                </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+    <div class="input-container">
+            <input class="textInput" id="chat-message-input" type="text" placeholder="Type a message"><br>
+            <button class="send-btn" id="chat-message-submit" type="submit"><ion-icon size="large" name="send"></ion-icon></button>
+    </div>
+
+
+    {{ room.slug|json_script:"room-name" }}
+    {{ request.user.username|json_script:"username" }}
+
+    <script>
+        const chatLog = document.querySelector('#chat-log');
+        const roomName = JSON.parse(document.getElementById('room-name').textContent);
+        const userName = JSON.parse(document.getElementById('username').textContent);
+
+        const chatSocket = new WebSocket(
+        'ws://'
+        + window.location.host
+        + '/ws/'
+        + roomName
+        + '/'
+        );
+
+        if (chatLog.childNodes.length <= 1) {
+            const roomMessage = document.createElement('h3')
+            roomMessage.id = 'roomMessage'
+            roomMessage.innerText = 'Looks like there are no messages yet.'
+            roomMessage.className = 'roomMessage'
+            chatLog.appendChild(roomMessage)
+        }
+
+        function updateDiv() {
+            $("#chat-log").load(" #chat-log > *");
+        };
+
+        chatSocket.onmessage = function(e) {
+            const data = JSON.parse(e.data);
+            const messageElement = document.createElement('div')
+            const loggedInUser = data.username
+            messageElement.innerText += data.username + ': ' + data.message
+
+
+            if (userName === loggedInUser) {
+                messageElement.classList.add('message', 'sender')
+                } else {
+                messageElement.classList.add('message', 'receiver')
+                }
+
+            chatLog.appendChild(messageElement)
+
+            if (document.querySelector('#roomMessage')) {
+                document.querySelector('#roomMessage').remove()
+                }
+
+            updateDiv();
+            scrollToBottom();
+        };
+
+        chatSocket.onclose = function(e) {
+            console.error('Chat socket closed unexpectedly');
+        };
+
+        document.querySelector('#chat-message-input').focus();
+        document.querySelector('#chat-message-input').onkeyup = function(e) {
+            if (e.keyCode === 13) {  // enter, return
+                document.querySelector('#chat-message-submit').click();
+            }
+        };
+
+        document.querySelector('#chat-message-submit').onclick = function(e) {
+            e.preventDefault();
+
+            const messageInputDom = document.querySelector('#chat-message-input');
+            const message = messageInputDom.value;
+
+            chatSocket.send(JSON.stringify({
+                'message': message,
+                'username': userName,
+                'room': roomName
+            }));
+            messageInputDom.value = '';
+            return False
+        };
+
+        function scrollToBottom() {
+            let objDiv = document.getElementById("chat-log");
+            objDiv.scrollTop = objDiv.scrollHeight;
+        };
+
+        scrollToBottom();
+    </script>
+{% endblock content %}

@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}
+    <title>{{ user.username }}'s Profile</title>
+{% endblock title %}
+
+{% block content %}
+    {% include 'navbar.html' %}
+
+
+<div class="profile-page">
+    <div class="profile-update-form">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+        <div class="profile-info">
+            <div class="profile-image-place">
+                <img class="profile-image" src="{{ user.profile.image.url }}">
+            </div>
+            <div class="profile-user-info">
+                <h2>{{ user.username }}</h2>
+                <p>{{ user.email }}</p>
+            </div>
+        </div>
+
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <fieldset class="form-group">
+                <legend class="p-info"> Profile Info </legend>
+                {{ user_form|crispy }}
+                {{ profile_form|crispy }}
+            </fieldset>
+            <button class="custom-button" type="submit">Update</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

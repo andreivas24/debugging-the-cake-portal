@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+  <h1>Flexmonster integration with Django</h1>
+  <div id="pivotContainer"></div>
+  <script src="https://cdn.flexmonster.com/flexmonster.js"></script>
+
+  <script>
+    let pivot = new Flexmonster({
+        container: "pivotContainer",
+        componentFolder: "https://cdn.flexmonster.com/",
+        toolbar: true,
+        report: {
+            dataSource: {
+                filename: "https://cdn.flexmonster.com/data/data.json"
+            }
+        }
+    });
+</script>
+
+</head>
+<body>
+
+</body>
+</html>

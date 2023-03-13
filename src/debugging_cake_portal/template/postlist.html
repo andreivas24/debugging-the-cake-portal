@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+{% load crispy_forms_tags %}
+
+{% block title %}
+    <title>Debugging the Cake</title>
+{% endblock %}
+
+{% block content %}
+    {% include 'navbar.html'%}
+        {% for post in posts %}
+        <article class="media content-section">
+            <img class="rounded-circle article-img" src="{{ post.author.profile.image.url }}">
+            <div class="media-body">
+
+            <div class="article-metadata">
+                <div class="aliniere" style="display:flex;">
+                <a class="mr-2" href="#">{{ post.author }}</a>
+
+                <a class="text-muted">{{ post.date_created|date:"F d, Y" }}</a>
+                <form action="{% url 'like-post-view' %}" method="POST" class='like-form' id='{{post.id}}'>
+                    {% csrf_token %}
+                        <input type="hidden" name="post_id" value={{post.id}}>
+                            <button type="submit" class="btn btn2 edit ui button like-btn{{post.id}}">
+                                {% if user not in post.liked.all %}
+                                    <i class="fa fa-heart" style="font-size:24px;color:lightgrey;"></i>
+                                {% else %}
+                                    <i class="fa fa-heart" style="font-size:24px;color:indianred;"></i>
+                                {% endif %}
+                            </button>
+                </form>
+                </div>
+            </div>
+            <h2><a class="article-title" href="{% url 'post-detail' post.id %}">{{ post.title }}</a></h2>
+                <p class="article-content">{{ post.description|truncatechars:10}}</p>
+                <div class="ui grid">
+                    <div class="column">
+                        <div class="like-count{{post.id}}"> </div>
+                    </div>
+                    <div class="column">
+                        {{post.num_likes}} {% trans 'likes' %}
+                    </div>
+                </div>
+          </div>
+        </article>
+        {% endfor %}
+    {% load posts_extras %}
+
+
+<div>
+    <form method="get">
+        {{ filterset.form.as_p }}
+        <input type="submit" name="q" value="Search"/>
+    </form>
+</div>
+
+{% for post in post_page_obj %}
+    <article class="media content-section">
+        <img class="rounded-circle article-img" src="{{ post.author.profile.image.url }}">
+            <div class="media-body">
+               <div class="article-metadata">
+                  <a class="mr-2" href="#">{{ post.author }}</a>
+                  <small class="text-muted">{{ post.date_created|date:"F d, Y" }}</small>
+               </div><h2><a class="article-title" href="{% url 'post-detail' post.id %}">{{ post.title }}</a></h2>
+                <p class="article-content">{{ post.description|truncatechars:10}}</p>
+            </div>
+    </article>
+{% endfor %}
+
+
+<ul class="pagination justify-content-center flex-wrap mt-2 mb-4">
+    {% if post_page_obj.has_previous %}
+        <li class="page-item"><a class = "page-link" href="{% my_url 1 'page' request.GET.urlencode %}">&laquo;</a></li>
+    {% else %}
+        <li class="disabled page-item"><spanc class="page-link">&laquo;</spanc></li>
+    {% endif %}
+
+    {% for i in page_range|default_if_none:post_page_obj.paginator.get_elided_page_range %}
+        {% if post_page_obj.number == i %}
+            <li class="active page-item"><span class="page-link">{{ i }}<span class="sr-only">(current)</span></span></li>
+        {% else %}
+        {% if i == post_page_obj.paginator.ELLIPSIS %}
+            <li class="page-item"><span class="page-link">{{ i }}</span></li>
+        {% else %}
+            <li class="page-item"><a class="page-link" href="{% my_url i 'page' request.GET.urlencode %}">{{ i }}</a></li>
+        {% endif %}
+        {% endif %}
+    {% endfor %}
+  </ul>
+
+{% endblock content %}
+

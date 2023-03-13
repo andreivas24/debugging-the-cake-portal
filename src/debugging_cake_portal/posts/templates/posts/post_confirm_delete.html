@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+    {% load i18n %}
+{% include 'navbar.html'%}
+    <div class="content-section">
+        <form method="POST">
+            {% csrf_token %}
+            <fieldset class="form-group">
+                <h2>{% trans 'Are you sure you want to delete the post ' %}{{ post.title }} ? </h2>
+            </fieldset>
+            <div class="form-group">
+                <button class="custom-button2 btn-outline-danger" type="submit">Yes, Delete</button>
+                <a class="custom-button btn-outline-secondary" href="{% url 'post-detail' post.id %}">Cancel</a>
+            </div>
+        </form>
+    </div>
+{% endblock content %}

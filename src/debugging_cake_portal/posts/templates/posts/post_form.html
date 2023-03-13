@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% load static %}
+{% load i18n %}
+
+
+{% load crispy_forms_tags %}
+{% include 'navbar.html'%}
+
+{% block content %}
+        {% include 'navbar.html'%}
+
+    <div class="post-page">
+
+        <div class="post-form">
+        <form enctype="multipart/form-data" method="post">
+            {% csrf_token %}
+            <fieldset class="form-group">
+                <legend class="border-bottom mb-4">Blog Post</legend>
+                {{ form|crispy }}
+            </fieldset>
+            <div class="form-group">
+                <button class="custom-button" type="submit">Post</button>
+            </div>
+        </form>
+        </div>
+    </div>
+
+{% endblock content %}

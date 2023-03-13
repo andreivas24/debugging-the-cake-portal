@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+{% load i18n %}
+    {% include 'navbar.html'%}
+    {% load crispy_forms_tags %}
+
+    <article class="media content-section">
+    <div class="media-body">
+        <div class="article-metadata">
+            <img class="rounded-circle article-img" src="{{ post.author.profile.image.url }}">
+            <a class="mr-2" href="#">{{ post.author }}</a>
+            <small class="text-muted">{{ post.date_created|date:"F d, Y" }}</small>
+
+            {% if post.author == user %}
+                <div class="article-metadata-buttons">
+                    <a class="btn btn2 edit btn-sm mt-1 mb-1" href="{% url 'post-update' post.id %}">
+                    <span class="material-symbols-outlined">
+                        edit
+                    </span>
+                    </a>
+                    <a class="btn btn2 delete btn-sm mt-1 mb-1" href="{% url 'post-delete' post.id %}">
+                        <span class="material-symbols-outlined">
+                            delete
+                        </span>
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+        <h2 class="article-title">{{ post.title }}</h2>
+        <p class="article-content">{{ post.description }}</p>
+
+        {% if post.file %}
+        <p>File preview</p>
+            <span> {{ post.results }}... </span>
+        {% endif %}
+    </div>
+    </article>
+
+    <!--comments-->
+    <div class="comment-section">
+        <div class="comment-container ">
+            <div class="comment-title"> Comments({{post_comments_count}})</div>
+                {% if user.is_authenticated %}
+                    <form action="" method="POST" id="main_form" class="comment_form">
+                    </form>
+                    <div class=" ">
+                        <div class=" ">
+                            <!--display comment-->
+                            <div class="media-list">
+                                {% for comment in post_comments %}
+                                    {% if comment.is_parent %}
+                                        <div>
+                                            <div class="media-body">
+                                                <hr>
+                                                <div class="comment-user">
+                                                <img class="rounded-circle article-img2" src="{{ comment.user.profile.image.url }}">
+                                                    <b> {{comment.user}}</b>
+                                                    <time class="ml-4 opacity-70 small-3"> {{comment.created}}</time>
+                                                </div>
+                                                <p class="comment-content"> {{comment.content}}</p>
+                                            </div>
+                                            <form action="" method="POST" id="main_form2" class="comment_form">
+                                                <div class="reply-btn">
+
+<!--                                                <label form="comment">Reply here:</label>-->
+<!--                                                <input type="text" name="content"> <input type="hidden" value="{{ comment.pk }}" name="parent"> {% csrf_token %} <input type="submit" value="Reply">-->
+                                                        <p class="hidden-div" id='{{comment.pk}}' style='display: none'> <input type="text" name="content"> <input type="hidden" value="{{ comment.pk }}" name="parent"> {% csrf_token %} <input class="custom-button" type="submit" value="Reply"></p>
+
+                                                        <button id='{{comment.pk}}-button' class="custom-button reply-button" type='button' onclick="toggleText({{comment.pk}})">Reply</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    {% endif %}
+
+                                    <script>
+                                        function toggleText(e) {
+                                            var text = document.getElementById(e);
+                                            var name = "" + e + "-button";
+                                            var button = document.getElementById(name);
+
+                                            if (text.style.display === "none") {
+                                                 text.style.display = "block";
+                                            }
+
+                                            if (button.style.display !== "none") {
+                                                 button.style.display = "none";
+                                            }
+                                        }
+                                    </script>
+
+                                    {% for replies in comment.children %}
+                                        <h3 class="reply-content">
+                                            <img class="rounded-circle article-img2" src="{{ replies.user.profile.image.url }}">
+                                        <b>{{ replies.user }} : </b>
+                                        <div class="reply-content2"> {{ replies.content }} </div>
+                                        </h3>
+                                    {% endfor %}
+                                {% endfor %}
+                            </div>
+
+                    {% else %} <h2>{% trans 'You need to Login in order to comment' %}</h2>
+                    {% endif %}
+
+                            <!--display the form-->
+                            <form method="POST">
+                                {% csrf_token %}
+                                <div class="form-group">
+                                    {{form}}
+                                </div>
+                                <button class="custom-button " type="submit">Comment</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+{% endblock content %}
